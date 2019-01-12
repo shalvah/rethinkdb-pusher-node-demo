@@ -1,9 +1,17 @@
-var express = require('express');
-var router = express.Router();
+const router = require('express').Router();
+const r = require('rethinkdb');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+let connection;
+r.connect({host: 'localhost', port: 28015, db: 'test'})
+    .then(conn => {
+      connection = conn;
+    });
+
+/* Render the feed. */
+router.get('/', async (req, res, next) => {
+  const posts = await r.table('posts').orderBy(r.desc('date')).run(connection)
+      .then(cursor => cursor.toArray());
+  res.render('index', { posts });
 });
 
 module.exports = router;
