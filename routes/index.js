@@ -5,7 +5,14 @@ let connection;
 r.connect({host: 'localhost', port: 28015, db: 'test'})
     .then(conn => {
       connection = conn;
+      return r.table('posts').changes().run(connection);
+    }).then(cursor => {
+      cursor.each((err, row) => {
+        if (err) throw err;
+        console.log(row.new_val)
+        // publish row to the frontend
     });
+});
 
 /* Render the feed. */
 router.get('/', async (req, res, next) => {
