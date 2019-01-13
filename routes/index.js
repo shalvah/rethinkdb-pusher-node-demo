@@ -1,6 +1,12 @@
 const router = require('express').Router();
 const r = require('rethinkdb');
-
+const Pusher = require('pusher');
+const pusher = new Pusher({
+    appId: process.env.PUSHER_APP_ID,
+    key: process.env.PUSHER_APP_KEY,
+    secret: process.env.PUSHER_APP_SECRET,
+    cluster: process.env.PUSHER_APP_CLUSTER
+});
 let connection;
 r.connect({host: 'localhost', port: 28015, db: 'test'})
     .then(conn => {
@@ -9,8 +15,8 @@ r.connect({host: 'localhost', port: 28015, db: 'test'})
     }).then(cursor => {
       cursor.each((err, row) => {
         if (err) throw err;
-        console.log(row.new_val)
-        // publish row to the frontend
+        const post = row.new_val;
+        pusher.trigger('post-events', 'new-post', { post }, (err) => console.log(err));
     });
 });
 
@@ -18,7 +24,7 @@ r.connect({host: 'localhost', port: 28015, db: 'test'})
 router.get('/', async (req, res, next) => {
   const posts = await r.table('posts').orderBy(r.desc('date')).run(connection)
       .then(cursor => cursor.toArray());
-  res.render('index', { posts });
+  res.render('index', { posts, appKey: process.env.PUSHER_APP_KEY });
 });
 
 /* Show the view to create a new post. */

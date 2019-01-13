@@ -1,4 +1,4 @@
-<div class="container-fluid text-center">
+<div class="container-fluid text-center" id="posts-list">
 
     {{#each posts }}
         <div class="card">
@@ -11,3 +11,26 @@
     {{/each}}
 
 </div>
+
+<script src="https://js.pusher.com/4.3/pusher.min.js"></script>
+<script>
+    // Enable pusher logging
+    Pusher.logToConsole = true;
+    const pusher = new Pusher("{{ appKey }}", {
+        cluster: 'eu'
+    });
+    const channel = pusher.subscribe('post-events');
+    channel.bind('new-post', (data) => {
+        const postsList = document.getElementById('posts-list');
+        postsList.insertBefore(createPostCard(data.post), postsList.firstChild);
+    });
+
+    function createPostCard(post) {
+        let cardElement = document.querySelector('.card');
+        let newCard = cardElement.cloneNode(true);
+        newCard.querySelector('.card-title').innerText = post.title;
+        newCard.querySelector('.card-subtitle').innerText = new Date(post.date).toString();
+        newCard.querySelector('.card-text').innerText = post.content;
+        return newCard;
+    }
+</script>
