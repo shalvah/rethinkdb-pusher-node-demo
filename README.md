@@ -1,7 +1,7 @@
 # rethinkdb-pusher-node-demo
 Express app to demonstrate Pusher + RethinkDB for realtime functionality
 
-[View tutorial]()
+[View tutorial](https://pusher.com/tutorials/live-node-rethinkdb)
 
 ## Prerequisites
 - Node.js 8.10.0 or higher
